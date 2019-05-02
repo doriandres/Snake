@@ -312,7 +312,7 @@ class SnakeGame{
         if(key.includes("right")){
             newDirection = "right";
         }
-        if(newDirection !== getOpositeDirection(this.snake.direction)){
+        if(newDirection !== getOpositeDirection(this.snake.direction) && newDirection !== this.snake.direction){
             this.snake.direction = newDirection;
             this.snake.walk()
             clearInterval(this.moveInterval);
