@@ -314,6 +314,9 @@ class SnakeGame{
         }
         if(newDirection !== getOpositeDirection(this.snake.direction)){
             this.snake.direction = newDirection;
+            this.snake.walk()
+            clearInterval(this.moveInterval);
+            this.moveInterval = setInterval(this.movementLoop.bind(this), 200);
         }
     }
     movementLoop(){
