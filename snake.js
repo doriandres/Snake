@@ -328,18 +328,18 @@ class SnakeGame{
     controlHandler(event){
         var key  = event.key.toLowerCase();
         var newDirection;
-        if(key.includes("up") || key.includes("w")){
+        if(key.includes("up") || key === "w"){
             newDirection = "top";
         }else
-        if(key.includes("down") || key.includes("s")){
+        if(key.includes("down") || key === "s"){
             newDirection = "bottom";
         }
         else
-        if(key.includes("left") || key.includes("a")){
+        if(key.includes("left") || key === "a"){
             newDirection = "left";
         }
         else
-        if(key.includes("right") || key.includes("d")){
+        if(key.includes("right") || key === "d"){
             newDirection = "right";
         }
         if(newDirection !== getOpositeDirection(this.snake.direction) && newDirection !== this.snake.direction){
