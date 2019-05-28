@@ -221,7 +221,7 @@ class Snake {
         }while(this.chunks.length !== this.length);        
     }
     walk(){
-        var space  = this.field.getRelativeSpace(this.head.space, this.direction);
+        let space  = this.field.getRelativeSpace(this.head.space, this.direction);
         if(space === null || space.object instanceof SnakeChunk){
             this.dead = true;
             return;
@@ -238,7 +238,8 @@ class Snake {
             this.grow(lastSpace);
         }else{
             lastSpace.object = null;
-        }     
+        }
+        return grow;     
     }
     grow(lastSpace){
         var chunk =  new SnakeChunk(lastSpace);
@@ -275,18 +276,35 @@ class Apple{
 }
 
 class SnakeGame{
-    constructor(field, snake){
+    constructor(field, snake, scoreElement, highestScoreElement){
+        this.scoreElement = scoreElement;
+        this.highestScoreElement = highestScoreElement;
+        this._score = 0;
         this.field = field;
         this.snake =  snake;
         this.apples = [];
         this.moveInterval = setInterval(this.movementLoop.bind(this), 200);
         this.appleGenerationsInterval = setInterval(this.appleGenerationsLoop.bind(this),5000);
-        window.addEventListener("keydown", this.controlHandler.bind(this));
+        this._controlHandler = this.controlHandler.bind(this);
+        window.addEventListener("keydown", this._controlHandler);
+
+        if(highestScoreElement && highestScoreElement.textContent){
+            highestScoreElement.textContent = localStorage.getItem("highest") || 0;            
+        }
         for(let i = 0; i < 5; i++){
             this.apples.push(new Apple(this.field));
         }
     }
-
+    get score(){
+        return this._score;
+    }
+    set score(value){
+        this._score = value;
+        if(this.scoreElement && this.scoreElement.textContent){
+            this.scoreElement.textContent = this._score;
+        }
+        
+    }
     appleGenerationsLoop(){
         this.apples.forEach(a => a.disappear());
         this.apples = [];
@@ -314,7 +332,9 @@ class SnakeGame{
         }
         if(newDirection !== getOpositeDirection(this.snake.direction) && newDirection !== this.snake.direction){
             this.snake.direction = newDirection;
-            this.snake.walk()
+            if(this.snake.walk()){
+                this.score++;
+            }
             clearInterval(this.moveInterval);
             this.moveInterval = setInterval(this.movementLoop.bind(this), 200);
         }
@@ -322,11 +342,19 @@ class SnakeGame{
     movementLoop(){
         requestAnimationFrame(()=>{
             if(!this.snake.dead){
-                this.snake.walk();
+                if(this.snake.walk()){
+                    this.score++;
+                }
             }else{
                 clearInterval(this.moveInterval);
-                clearInterval(this.appleGenerationsInterval);            
+                clearInterval(this.appleGenerationsInterval);
+                window.removeEventListener("keydown", this._controlHandler);
+                let highest = localStorage.getItem("highest");
+                if(highest === null || highest && !isNaN(highest) && this.score > parseInt(highest)){
+                    localStorage.setItem("highest", this.score);
+                }                
                 alert("Game Over");
+                window.location = window.location;
             }
         })        
     }
@@ -336,5 +364,5 @@ class SnakeGame{
 (() => {    
     var field  = new Field(20, 20);
     var snake = new Snake(field, 5);
-    new SnakeGame(field, snake);
+    new SnakeGame(field, snake, document.getElementById("score"), document.getElementById("highest"));
 })();
