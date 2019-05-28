@@ -283,7 +283,8 @@ class SnakeGame{
         this.field = field;
         this.snake =  snake;
         this.apples = [];
-        this.moveInterval = setInterval(this.movementLoop.bind(this), 200);
+        this._moveSpeed = 200;
+        this.setUpMovement();
         this.appleGenerationsInterval = setInterval(this.appleGenerationsLoop.bind(this),5000);
         this._controlHandler = this.controlHandler.bind(this);
         window.addEventListener("keydown", this._controlHandler);
@@ -305,6 +306,17 @@ class SnakeGame{
         }
         
     }
+
+    setUpMovement(increaseSpeed){
+        if(!isNaN(this.moveInterval)){
+            clearInterval(this.moveInterval);
+        }        
+        if(increaseSpeed && this._moveSpeed > 50){
+            this._moveSpeed -= 0.5;
+        }
+        this.moveInterval = setInterval(this.movementLoop.bind(this), this._moveSpeed);
+    }
+
     appleGenerationsLoop(){
         this.apples.forEach(a => a.disappear());
         this.apples = [];
@@ -316,27 +328,28 @@ class SnakeGame{
     controlHandler(event){
         var key  = event.key.toLowerCase();
         var newDirection;
-        if(key.includes("up")){
+        if(key.includes("up") || key.includes("w")){
             newDirection = "top";
         }else
-        if(key.includes("down")){
+        if(key.includes("down") || key.includes("s")){
             newDirection = "bottom";
         }
         else
-        if(key.includes("left")){
+        if(key.includes("left") || key.includes("a")){
             newDirection = "left";
         }
         else
-        if(key.includes("right")){
+        if(key.includes("right") || key.includes("d")){
             newDirection = "right";
         }
         if(newDirection !== getOpositeDirection(this.snake.direction) && newDirection !== this.snake.direction){
             this.snake.direction = newDirection;
             if(this.snake.walk()){
                 this.score++;
-            }
-            clearInterval(this.moveInterval);
-            this.moveInterval = setInterval(this.movementLoop.bind(this), 200);
+                setUpMovement(true);
+            }else{
+                setUpMovement();
+            }            
         }
     }
     movementLoop(){
@@ -344,6 +357,7 @@ class SnakeGame{
             if(!this.snake.dead){
                 if(this.snake.walk()){
                     this.score++;
+                    setUpMovement(true);
                 }
             }else{
                 clearInterval(this.moveInterval);
